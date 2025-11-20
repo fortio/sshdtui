@@ -3,15 +3,23 @@ module fortio.org/sshd
 go 1.24.0
 
 require (
-	fortio.org/cli v1.12.3
 	fortio.org/log v1.18.3
+	fortio.org/scli v1.19.0
 	fortio.org/terminal v0.62.0
+	github.com/gliderlabs/ssh v0.3.8
+	golang.org/x/crypto v0.45.0
 )
 
 require (
+	fortio.org/cli v1.12.3 // indirect
+	fortio.org/dflag v1.9.3 // indirect
+	fortio.org/duration v1.0.4 // indirect
 	fortio.org/safecast v1.2.0 // indirect
+	fortio.org/sets v1.3.0 // indirect
 	fortio.org/struct2env v0.4.2 // indirect
 	fortio.org/version v1.0.4 // indirect
+	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
+	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/jbuchbinder/gopnm v0.0.0-20220507095634-e31f54490ce0 // indirect
 	github.com/kortschak/goroutine v1.1.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
