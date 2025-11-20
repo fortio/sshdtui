@@ -18,12 +18,12 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     call-codeql:
         uses: fortio/workflows/.github/workflows/codeql-analysis.yml@main
-    releaser-NAME:
+    releaser-sshd:
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         uses: fortio/workflows/.github/workflows/releaser.yml@main
         with:
-            description: "DESCRIPTION"
-            binary_name: "NAME"
+            description: "Ansipixels sshd demoes menu server"
+            binary_name: "sshd"
             dockerfile: "./Dockerfile"
         secrets:
             GH_PAT: ${{ secrets.GH_PAT }}
