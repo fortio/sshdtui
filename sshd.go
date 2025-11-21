@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"flag"
 	"os"
+	"strings"
 	"time"
 
 	"fortio.org/log"
@@ -54,17 +55,32 @@ func RunGameOfLife() {
 	life.RunGame(&game, FPS, 0.1, false)
 }
 
+func envMap(s ssh.Session, pty ssh.Pty) map[string]string {
+	m := make(map[string]string, len(s.Environ()))
+	for _, kv := range s.Environ() {
+		if i := strings.IndexByte(kv, '='); i >= 0 {
+			m[kv[:i]] = kv[i+1:]
+		}
+	}
+	if m["TERM"] == "" {
+		m["TERM"] = pty.Term
+	}
+	return m
+}
+
 func Handler(s ssh.Session) {
-	log.Infof("New SSH session from %v user=%s", s.RemoteAddr(), s.User())
 	p, c, ok := s.Pty()
+	env := envMap(s, p)
+	log.Infof("New SSH session from %v user=%s, env=%v", s.RemoteAddr(), s.User(), env)
 	log.S(log.Info, "Pty:", log.Any("pty", p), log.Any("ok", ok))
 	width, height := p.Window.Width, p.Window.Height
 	ap := ansipixels.AnsiPixels{
-		Out: bufio.NewWriter(s),
-		FPS: FPS,
-		H:   height,
-		W:   width,
-		C:   make(chan os.Signal, 1),
+		Out:       bufio.NewWriter(s),
+		FPS:       FPS,
+		H:         height,
+		W:         width,
+		C:         make(chan os.Signal, 1),
+		ColorMode: ansipixels.DetectColorModeEnv(func(key string) string { return env[key] }),
 	}
 	fps := 60
 	timeout := time.Duration(1000/fps) * time.Millisecond
