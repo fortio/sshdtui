@@ -81,13 +81,14 @@ func Handler(s ssh.Session) {
 	ap.TrueColor = true
 	resizeFunc := func() error {
 		ap.ClearScreen()
-		ap.WriteBoxed(ap.H/2-1, "Ansipixels sshd demo!\nInitial terminal width: %d, height: %d\nYou can resize me!\nQ to quit\n1 for brick game,  \n2 for game of life.",
+		ap.WriteBoxed(ap.H/2-1,
+			"Ansipixels sshd demo!\nTerminal width: %d, height: %d\nYou can resize me!\nQ to quit\n1 for brick game,  \n2 for game of life.",
 			width, height)
 		ap.EndSyncMode()
 		return nil
 	}
 	ap.OnResize = resizeFunc
-	ap.OnResize()
+	_ = ap.OnResize()
 	keepGoing := true
 	for keepGoing {
 		select {
@@ -96,7 +97,7 @@ func Handler(s ssh.Session) {
 				continue
 			}
 			width, height = w.Width, w.Height
-			log.Infof("Window resized to %dx%d", width, height)
+			log.LogVf("Window resized to %dx%d", width, height)
 			// Only send if it's not already queued
 			select {
 			case ap.C <- ansipixels.ResizeSignal:
@@ -123,14 +124,14 @@ func Handler(s ssh.Session) {
 				ap.EndSyncMode()
 				RunBrick()
 				ap.OnResize = resizeFunc
-				resizeFunc()
+				_ = resizeFunc()
 				ap.WriteAt(0, ap.H-2, "Exited Brick game ")
 			case '2':
 				ap.WriteAt(0, ap.H-2, "Starting Game of Life...")
 				ap.EndSyncMode()
 				RunGameOfLife()
 				ap.OnResize = resizeFunc
-				resizeFunc()
+				_ = resizeFunc()
 				ap.WriteAt(0, ap.H-2, "Exited Game of Life ")
 			default:
 				// echo back
