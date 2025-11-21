@@ -13,6 +13,9 @@ import (
 	"fortio.org/scli"
 	"fortio.org/terminal"
 	"fortio.org/terminal/ansipixels"
+	brick "fortio.org/terminal/brick/cli"
+	life "fortio.org/terminal/life/cli"
+	"fortio.org/terminal/life/conway"
 	"github.com/gliderlabs/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -34,6 +37,23 @@ func (ia InputAdapter) NormalMode() error {
 func (ia InputAdapter) StartDirect() {
 }
 
+const FPS = 30
+
+func RunBrick() {
+	bc := brick.BrickConfig{
+		FPS:      FPS,
+		NumLives: 3,
+	}
+	bc.Run()
+}
+
+func RunGameOfLife() {
+	game := conway.Game{
+		HasMouse: true,
+	}
+	life.RunGame(&game, FPS, 0.1, false)
+}
+
 func Handler(s ssh.Session) {
 	log.Infof("New SSH session from %v user=%s", s.RemoteAddr(), s.User())
 	p, c, ok := s.Pty()
@@ -41,7 +61,7 @@ func Handler(s ssh.Session) {
 	width, height := p.Window.Width, p.Window.Height
 	ap := ansipixels.AnsiPixels{
 		Out: bufio.NewWriter(s),
-		FPS: 60,
+		FPS: FPS,
 		H:   height,
 		W:   width,
 		C:   make(chan os.Signal, 1),
@@ -55,15 +75,20 @@ func Handler(s ssh.Session) {
 		ap.W, ap.H = width, height
 		return nil
 	}
-	ap.ClearScreen()
-	ap.WriteBoxed(ap.H/2-1, "Ansipixels sshd demo!\nInitial terminal width: %d, height: %d\nResize me!\nQ to quit", width, height)
-	ap.EndSyncMode()
-	ap.OnResize = func() error {
+	ansipixels.SharedAnsiPixels = &ap
+	ap.SkipOpen = true
+	ap.AutoSync = true
+	ap.TrueColor = true
+	resizeFunc := func() error {
 		ap.ClearScreen()
-		ap.WriteBoxed(ap.H/2-3, "Window size changed:\n%d x %d ", width, height)
+		ap.WriteBoxed(ap.H/2-1,
+			"Ansipixels sshd demo!\nTerminal width: %d, height: %d\nYou can resize me!\nQ to quit\n1 for brick game,  \n2 for game of life.",
+			width, height)
 		ap.EndSyncMode()
 		return nil
 	}
+	ap.OnResize = resizeFunc
+	_ = ap.OnResize()
 	keepGoing := true
 	for keepGoing {
 		select {
@@ -72,7 +97,7 @@ func Handler(s ssh.Session) {
 				continue
 			}
 			width, height = w.Width, w.Height
-			log.Infof("Window resized to %dx%d", width, height)
+			log.LogVf("Window resized to %dx%d", width, height)
 			// Only send if it's not already queued
 			select {
 			case ap.C <- ansipixels.ResizeSignal:
@@ -92,8 +117,25 @@ func Handler(s ssh.Session) {
 			c := ap.Data[0]
 			switch c {
 			case 3, 'q': // Ctrl-C or 'q'
+				log.Infof("Exit requested, closing session")
 				ap.WriteAt(0, ap.H-2, "Exit requested, closing session.")
 				keepGoing = false
+			case '1':
+				log.Infof("Starting Brick game")
+				ap.WriteAt(0, ap.H-2, "Starting Brick game...")
+				ap.EndSyncMode()
+				RunBrick()
+				ap.OnResize = resizeFunc
+				_ = resizeFunc()
+				ap.WriteAt(0, ap.H-2, "Exited Brick game ")
+			case '2':
+				log.Infof("Starting Game of Life")
+				ap.WriteAt(0, ap.H-2, "Starting Game of Life...")
+				ap.EndSyncMode()
+				RunGameOfLife()
+				ap.OnResize = resizeFunc
+				_ = resizeFunc()
+				ap.WriteAt(0, ap.H-2, "Exited Game of Life ")
 			default:
 				// echo back
 				ap.WriteAt(0, ap.H-2, "Received %q", ap.Data)

@@ -1,4 +1,4 @@
 FROM scratch
-COPY sshd /usr/bin/sshd
+COPY sshdtui /usr/bin/sshdtui
 ENV HOME=/home/user
-ENTRYPOINT ["/usr/bin/sshd"]
+ENTRYPOINT ["/usr/bin/sshdtui"]
