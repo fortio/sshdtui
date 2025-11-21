@@ -1,4 +1,4 @@
-module fortio.org/sshd
+module fortio.org/sshdtui
 
 go 1.24.0
 
