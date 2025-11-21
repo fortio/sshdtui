@@ -117,9 +117,11 @@ func Handler(s ssh.Session) {
 			c := ap.Data[0]
 			switch c {
 			case 3, 'q': // Ctrl-C or 'q'
+				log.Infof("Exit requested, closing session")
 				ap.WriteAt(0, ap.H-2, "Exit requested, closing session.")
 				keepGoing = false
 			case '1':
+				log.Infof("Starting Brick game")
 				ap.WriteAt(0, ap.H-2, "Starting Brick game...")
 				ap.EndSyncMode()
 				RunBrick()
@@ -127,6 +129,7 @@ func Handler(s ssh.Session) {
 				_ = resizeFunc()
 				ap.WriteAt(0, ap.H-2, "Exited Brick game ")
 			case '2':
+				log.Infof("Starting Game of Life")
 				ap.WriteAt(0, ap.H-2, "Starting Game of Life...")
 				ap.EndSyncMode()
 				RunGameOfLife()
