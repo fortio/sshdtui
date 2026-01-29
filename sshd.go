@@ -77,8 +77,8 @@ func RunBlackjackGame(ap *ansipixels.AnsiPixels) {
 func envMap(s ssh.Session, pty ssh.Pty) map[string]string {
 	m := make(map[string]string, len(s.Environ()))
 	for _, kv := range s.Environ() {
-		if i := strings.IndexByte(kv, '='); i >= 0 {
-			m[kv[:i]] = kv[i+1:]
+		if before, after, ok := strings.Cut(kv, "="); ok {
+			m[before] = after
 		}
 	}
 	if m["TERM"] == "" {
