@@ -6,7 +6,7 @@ require (
 	fortio.org/cli v1.12.3
 	fortio.org/log v1.18.3
 	fortio.org/scli v1.19.0
-	fortio.org/terminal v0.63.3
+	fortio.org/terminal v0.63.4
 	github.com/gliderlabs/ssh v0.3.8
 	golang.org/x/crypto v0.47.0
 )
