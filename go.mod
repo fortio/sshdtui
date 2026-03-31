@@ -6,7 +6,7 @@ require (
 	fortio.org/cli v1.12.3
 	fortio.org/log v1.18.3
 	fortio.org/scli v1.19.0
-	fortio.org/terminal v0.64.1
+	fortio.org/terminal v0.65.0
 	github.com/gliderlabs/ssh v0.3.8
 	golang.org/x/crypto v0.49.0
 )
@@ -24,7 +24,7 @@ require (
 	github.com/kortschak/goroutine v1.1.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20251028130051-c0531f9c3451 // indirect
-	golang.org/x/image v0.36.0 // indirect
+	golang.org/x/image v0.38.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.41.0 // indirect
 )
